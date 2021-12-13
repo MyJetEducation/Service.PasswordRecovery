@@ -3,9 +3,9 @@ using System.Runtime.Serialization;
 namespace Service.PasswordRecovery.Grpc.Models
 {
     [DataContract]
-    public class HelloRequest
+    public class RecoveryPasswordGrpcRequest
     {
         [DataMember(Order = 1)]
-        public string Name { get; set; }
+        public string Email { get; set; }
     }
 }

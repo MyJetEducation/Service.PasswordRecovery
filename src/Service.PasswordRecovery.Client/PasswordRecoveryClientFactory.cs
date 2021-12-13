@@ -11,6 +11,6 @@ namespace Service.PasswordRecovery.Client
         {
         }
 
-        public IHelloService GetHelloService() => CreateGrpcService<IHelloService>();
+        public IPasswordRecoveryService GetPasswordRecoveryService() => CreateGrpcService<IPasswordRecoveryService>();
     }
 }

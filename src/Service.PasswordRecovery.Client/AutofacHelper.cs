@@ -5,13 +5,13 @@ using Service.PasswordRecovery.Grpc;
 
 namespace Service.PasswordRecovery.Client
 {
-    public static class AutofacHelper
-    {
-        public static void RegisterPasswordRecoveryClient(this ContainerBuilder builder, string grpcServiceUrl)
-        {
-            var factory = new PasswordRecoveryClientFactory(grpcServiceUrl);
+	public static class AutofacHelper
+	{
+		public static void RegisterPasswordRecoveryClient(this ContainerBuilder builder, string grpcServiceUrl)
+		{
+			var factory = new PasswordRecoveryClientFactory(grpcServiceUrl);
 
-            builder.RegisterInstance(factory.GetHelloService()).As<IHelloService>().SingleInstance();
-        }
-    }
+			builder.RegisterInstance(factory.GetPasswordRecoveryService()).As<IPasswordRecoveryService>().SingleInstance();
+		}
+	}
 }
