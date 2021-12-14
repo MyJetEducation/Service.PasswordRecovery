@@ -2,12 +2,15 @@
 using System.Threading.Tasks;
 using DotNetCoreDecorators;
 using Microsoft.Extensions.Logging;
+using Service.Core.Domain.Extensions;
+using Service.Core.Domain.Models;
+using Service.Core.Grpc.Models;
 using Service.PasswordRecovery.Domain.Models;
 using Service.PasswordRecovery.Grpc;
 using Service.PasswordRecovery.Grpc.Models;
+using Service.PasswordRecovery.Models;
 using Service.UserInfo.Crud.Grpc;
 using Service.UserInfo.Crud.Grpc.Models;
-using CommonGrpcResponse = Service.PasswordRecovery.Grpc.Models.CommonGrpcResponse;
 
 namespace Service.PasswordRecovery.Services
 {
@@ -15,24 +18,24 @@ namespace Service.PasswordRecovery.Services
 	{
 		private readonly ILogger<PasswordRecoveryService> _logger;
 		private readonly IPublisher<IRecoveryInfo> _publisher;
-		private readonly IHashDictionary _hashDictionary;
+		private readonly IHashCodeService<EmailHashDto> _hashCodeService;
 		private readonly IUserInfoService _userInfoService;
 
 		public PasswordRecoveryService(ILogger<PasswordRecoveryService> logger,
 			IPublisher<IRecoveryInfo> publisher,
-			IHashDictionary hashDictionary,
+			IHashCodeService<EmailHashDto> hashCodeService,
 			IUserInfoService userInfoService)
 		{
 			_logger = logger;
 			_publisher = publisher;
-			_hashDictionary = hashDictionary;
+			_hashCodeService = hashCodeService;
 			_userInfoService = userInfoService;
 		}
 
 		public async ValueTask<CommonGrpcResponse> Recovery(RecoveryPasswordGrpcRequest request)
 		{
 			string email = request.Email;
-			string hash = _hashDictionary.NewHash(email);
+			string hash = _hashCodeService.New(new EmailHashDto(email));
 
 			if (hash == null)
 				return CommonGrpcResponse.Fail;
@@ -52,18 +55,18 @@ namespace Service.PasswordRecovery.Services
 
 		public async ValueTask<CommonGrpcResponse> Change(ChangePasswordGrpcRequest request)
 		{
-			string hash = request.Hash;
-			string email = _hashDictionary.GetEmail(hash);
 			string password = request.Password;
+			string hash = request.Hash;
+			string email = _hashCodeService.Get(hash)?.Email;
 
-			if (email == null || string.IsNullOrWhiteSpace(password))
+			if (email == null || password.IsNullOrWhiteSpace())
 				return CommonGrpcResponse.Fail;
 
-			_logger.LogDebug($"Changing password for {email} with {password}.");
+			_logger.LogDebug("Changing password for {email} with new password.", email);
 
-			UserInfo.Crud.Grpc.Models.CommonGrpcResponse response = await _userInfoService.ChangePasswordAsync(new UserInfoChangePasswordRequest
+			CommonGrpcResponse response = await _userInfoService.ChangePasswordAsync(new UserInfoChangePasswordRequest
 			{
-				Email = email, 
+				UserName = email,
 				Password = password
 			});
 

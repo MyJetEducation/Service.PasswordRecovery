@@ -19,7 +19,8 @@ namespace Service.PasswordRecovery
 {
 	public class Startup
 	{
-		private static MyServiceBusTcpClient _serviceBusTcpClient;
+		//private static MyServiceBusTcpClient _serviceBusTcpClient;
+
 		private readonly MyIoc _ioc = new MyIoc();
 
 		public void ConfigureServices(IServiceCollection services)
@@ -28,7 +29,7 @@ namespace Service.PasswordRecovery
 			services.AddHostedService<ApplicationLifetimeManager>();
 			services.AddMyTelemetry("ED-", Program.Settings.ZipkinUrl);
 
-			_serviceBusTcpClient = _ioc.BindServiceBus(Program.Settings);
+			//_serviceBusTcpClient = _ioc.BindServiceBus(Program.Settings);
 		}
 
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -48,7 +49,7 @@ namespace Service.PasswordRecovery
 				endpoints.MapGet("/", async context => await context.Response.WriteAsync("Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909"));
 			});
 
-			_serviceBusTcpClient.Start();
+			//_serviceBusTcpClient.Start();
 		}
 
 		public void ConfigureContainer(ContainerBuilder builder)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using ProtoBuf.Grpc.Client;
+using Service.Core.Grpc.Models;
 using Service.PasswordRecovery.Client;
 using Service.PasswordRecovery.Grpc;
 using Service.PasswordRecovery.Grpc.Models;
@@ -19,7 +20,8 @@ namespace TestApp
 			var factory = new PasswordRecoveryClientFactory("http://localhost:5001");
 			IPasswordRecoveryService client = factory.GetPasswordRecoveryService();
 
-			await client.Recovery(new RecoveryPasswordGrpcRequest {Email = "some@email.com"});
+			CommonGrpcResponse response = await client.Recovery(new RecoveryPasswordGrpcRequest {Email = "some@email.com"});
+			Console.WriteLine(response);
 
 			Console.WriteLine("End");
 			Console.ReadLine();
