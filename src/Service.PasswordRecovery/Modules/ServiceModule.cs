@@ -19,7 +19,7 @@ namespace Service.PasswordRecovery.Modules
 			builder.RegisterType<SystemClock>().AsImplementedInterfaces().SingleInstance();
 			builder.RegisterType<HashCodeService<EmailHashDto>>().As<IHashCodeService<EmailHashDto>>().SingleInstance();
 
-			var tcpServiceBus = new MyServiceBusTcpClient(() => Program.Settings.ServiceBusWriter, Program.AppName);
+			var tcpServiceBus = new MyServiceBusTcpClient(() => Program.Settings.ServiceBusWriter, "MyJetEducation Service.PasswordRecovery");
 			IPublisher<IRecoveryInfo> clientRegisterPublisher = new MyServiceBusPublisher(tcpServiceBus);
 			builder.Register(context => clientRegisterPublisher);
 			tcpServiceBus.Start();

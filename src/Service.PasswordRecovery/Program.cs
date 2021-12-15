@@ -14,7 +14,6 @@ namespace Service.PasswordRecovery
 {
 	public class Program
 	{
-		public const string AppName = "MyJetEducation Service.PasswordRecovery";
 		public const string SettingsFileName = ".myjeteducation";
 
 		public static SettingsModel Settings { get; private set; }
@@ -29,7 +28,7 @@ namespace Service.PasswordRecovery
 
 		public static void Main(string[] args)
 		{
-			Console.Title = AppName;
+			Console.Title = "MyJetEducation Service.PasswordRecovery";
 
 			Settings = SettingsReader.GetSettings<SettingsModel>(SettingsFileName);
 
