@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using DotNetCoreDecorators;
 using Microsoft.Extensions.Logging;
-using Service.Core.Domain.Extensions;
-using Service.Core.Domain.Models;
-using Service.Core.Grpc.Models;
+using Service.Core.Client.Extensions;
+using Service.Core.Client.Models;
+using Service.Core.Client.Services;
 using Service.PasswordRecovery.Domain.Models;
 using Service.PasswordRecovery.Grpc;
 using Service.PasswordRecovery.Grpc.Models;
@@ -17,12 +17,12 @@ namespace Service.PasswordRecovery.Services
 	public class PasswordRecoveryService : IPasswordRecoveryService
 	{
 		private readonly ILogger<PasswordRecoveryService> _logger;
-		private readonly IPublisher<IRecoveryInfo> _publisher;
+		private readonly IPublisher<RecoveryInfoServiceBusModel> _publisher;
 		private readonly IHashCodeService<EmailHashDto> _hashCodeService;
 		private readonly IUserInfoService _userInfoService;
 
 		public PasswordRecoveryService(ILogger<PasswordRecoveryService> logger,
-			IPublisher<IRecoveryInfo> publisher,
+			IPublisher<RecoveryInfoServiceBusModel> publisher,
 			IHashCodeService<EmailHashDto> hashCodeService,
 			IUserInfoService userInfoService)
 		{

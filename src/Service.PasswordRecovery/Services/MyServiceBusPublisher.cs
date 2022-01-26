@@ -6,7 +6,7 @@ using SimpleTrading.ServiceBus.CommonUtils.Serializers;
 
 namespace Service.PasswordRecovery.Services
 {
-	public class MyServiceBusPublisher : IPublisher<IRecoveryInfo>
+	public class MyServiceBusPublisher : IPublisher<RecoveryInfoServiceBusModel>
 	{
 		private readonly MyServiceBusTcpClient _client;
 
@@ -16,15 +16,9 @@ namespace Service.PasswordRecovery.Services
 			_client.CreateTopicIfNotExists(RecoveryInfoServiceBusModel.TopicName);
 		}
 
-		public ValueTask PublishAsync(IRecoveryInfo valueToPublish)
+		public ValueTask PublishAsync(RecoveryInfoServiceBusModel valueToPublish)
 		{
-			var serviceBusModel = new RecoveryInfoServiceBusModel
-			{
-				Email = valueToPublish.Email,
-				Hash = valueToPublish.Hash
-			};
-
-			byte[] bytesToSend = serviceBusModel.ServiceBusContractToByteArray();
+			byte[] bytesToSend = valueToPublish.ServiceBusContractToByteArray();
 
 			Task task = _client.PublishAsync(RecoveryInfoServiceBusModel.TopicName, bytesToSend, false);
 

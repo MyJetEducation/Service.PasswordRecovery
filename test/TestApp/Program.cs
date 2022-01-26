@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using ProtoBuf.Grpc.Client;
-using Service.Core.Grpc.Models;
+using Service.Core.Client.Models;
 using Service.PasswordRecovery.Client;
 using Service.PasswordRecovery.Grpc;
 using Service.PasswordRecovery.Grpc.Models;

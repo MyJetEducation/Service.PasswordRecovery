@@ -3,7 +3,7 @@
 namespace Service.PasswordRecovery.Domain.Models
 {
 	[DataContract]
-	public class RecoveryInfoServiceBusModel : IRecoveryInfo
+	public class RecoveryInfoServiceBusModel
 	{
 		public const string TopicName = "myjeteducation-recovery-password";
 

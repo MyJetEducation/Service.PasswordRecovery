@@ -1,6 +1,6 @@
 using System.ServiceModel;
 using System.Threading.Tasks;
-using Service.Core.Grpc.Models;
+using Service.Core.Client.Models;
 using Service.PasswordRecovery.Grpc.Models;
 
 namespace Service.PasswordRecovery.Grpc
