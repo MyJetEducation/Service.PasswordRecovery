@@ -1,10 +1,10 @@
 ﻿using Autofac;
-using DotNetCoreDecorators;
+using MyJetWallet.Sdk.ServiceBus;
 using MyServiceBus.TcpClient;
 using Service.Core.Client.Services;
-using Service.PasswordRecovery.Domain.Models;
 using Service.PasswordRecovery.Models;
 using Service.PasswordRecovery.Services;
+using Service.ServiceBus.Models;
 using Service.UserInfo.Crud.Client;
 
 namespace Service.PasswordRecovery.Modules
@@ -18,10 +18,8 @@ namespace Service.PasswordRecovery.Modules
 			builder.RegisterType<SystemClock>().AsImplementedInterfaces().SingleInstance();
 			builder.RegisterType<HashCodeService<EmailHashDto>>().As<IHashCodeService<EmailHashDto>>().SingleInstance();
 
-			var tcpServiceBus = new MyServiceBusTcpClient(() => Program.Settings.ServiceBusWriter, "MyJetEducation Service.PasswordRecovery");
-			IPublisher<RecoveryInfoServiceBusModel> clientRegisterPublisher = new MyServiceBusPublisher(tcpServiceBus);
-			builder.Register(context => clientRegisterPublisher);
-			tcpServiceBus.Start();
+			MyServiceBusTcpClient tcpServiceBus = builder.RegisterMyServiceBusTcpClient(Program.ReloadedSettings(e => e.ServiceBusWriter), Program.LogFactory);
+			builder.RegisterMyServiceBusPublisher<RecoveryInfoServiceBusModel>(tcpServiceBus, RecoveryInfoServiceBusModel.TopicName, false);
 		}
 	}
 }

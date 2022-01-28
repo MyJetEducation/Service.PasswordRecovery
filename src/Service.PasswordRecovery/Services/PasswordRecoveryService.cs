@@ -1,14 +1,14 @@
 ﻿using System.Text.Json;
 using System.Threading.Tasks;
-using DotNetCoreDecorators;
 using Microsoft.Extensions.Logging;
+using MyJetWallet.Sdk.ServiceBus;
 using Service.Core.Client.Extensions;
 using Service.Core.Client.Models;
 using Service.Core.Client.Services;
-using Service.PasswordRecovery.Domain.Models;
 using Service.PasswordRecovery.Grpc;
 using Service.PasswordRecovery.Grpc.Models;
 using Service.PasswordRecovery.Models;
+using Service.ServiceBus.Models;
 using Service.UserInfo.Crud.Grpc;
 using Service.UserInfo.Crud.Grpc.Models;
 
@@ -17,12 +17,12 @@ namespace Service.PasswordRecovery.Services
 	public class PasswordRecoveryService : IPasswordRecoveryService
 	{
 		private readonly ILogger<PasswordRecoveryService> _logger;
-		private readonly IPublisher<RecoveryInfoServiceBusModel> _publisher;
+		private readonly IServiceBusPublisher<RecoveryInfoServiceBusModel> _publisher;
 		private readonly IHashCodeService<EmailHashDto> _hashCodeService;
 		private readonly IUserInfoService _userInfoService;
 
 		public PasswordRecoveryService(ILogger<PasswordRecoveryService> logger,
-			IPublisher<RecoveryInfoServiceBusModel> publisher,
+			IServiceBusPublisher<RecoveryInfoServiceBusModel> publisher,
 			IHashCodeService<EmailHashDto> hashCodeService,
 			IUserInfoService userInfoService)
 		{
