@@ -28,15 +28,19 @@ namespace Service.PasswordRecovery.Services
 		{
 			_logger = logger;
 			_publisher = publisher;
-			_hashCodeService = hashCodeService;
 			_userInfoService = userInfoService;
+
+			_hashCodeService = hashCodeService;
+			_hashCodeService.SetTimeOut(Program.ReloadedSettings(model => model.HashStoreTimeoutMinutes).Invoke());
 		}
 
 		public async ValueTask<CommonGrpcResponse> Recovery(RecoveryPasswordGrpcRequest request)
 		{
 			string email = request.Email;
-			string hash = _hashCodeService.New(new EmailHashDto(email));
+			if (_hashCodeService.Contains(dto => dto.Email == email))
+				return CommonGrpcResponse.Success;
 
+			string hash = _hashCodeService.New(new EmailHashDto(email));
 			if (hash == null)
 				return CommonGrpcResponse.Fail;
 

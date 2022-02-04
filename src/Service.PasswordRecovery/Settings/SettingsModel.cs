@@ -19,5 +19,8 @@ namespace Service.PasswordRecovery.Settings
 
 		[YamlProperty("PasswordRecovery.UserInfoCrudServiceUrl")]
 		public string UserInfoCrudServiceUrl { get; set; }
+
+		[YamlProperty("PasswordRecovery.HashStoreTimeoutMinutes")]
+		public int HashStoreTimeoutMinutes { get; set; }
 	}
 }
