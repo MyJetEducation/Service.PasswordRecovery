@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using MyJetWallet.Sdk.GrpcSchema;
 using MyJetWallet.Sdk.Service;
 using Prometheus;
+using Service.Grpc;
 using Service.PasswordRecovery.Grpc;
 using Service.PasswordRecovery.Modules;
 using Service.PasswordRecovery.Services;
@@ -19,7 +20,7 @@ namespace Service.PasswordRecovery
 	{
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.BindCodeFirstGrpc();
+			services.BindGrpc();
 			services.AddHostedService<ApplicationLifetimeManager>();
 			services.AddMyTelemetry("ED-", Program.Settings.ZipkinUrl);
 		}

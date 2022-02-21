@@ -1,16 +1,17 @@
 ﻿using JetBrains.Annotations;
-using MyJetWallet.Sdk.Grpc;
+using Microsoft.Extensions.Logging;
+using Service.Grpc;
 using Service.PasswordRecovery.Grpc;
 
 namespace Service.PasswordRecovery.Client
 {
     [UsedImplicitly]
-    public class PasswordRecoveryClientFactory: MyGrpcClientFactory
+    public class PasswordRecoveryClientFactory: GrpcClientFactory
     {
-        public PasswordRecoveryClientFactory(string grpcServiceUrl) : base(grpcServiceUrl)
+        public PasswordRecoveryClientFactory(string grpcServiceUrl, ILogger logger) : base(grpcServiceUrl, logger)
         {
         }
 
-        public IPasswordRecoveryService GetPasswordRecoveryService() => CreateGrpcService<IPasswordRecoveryService>();
+        public IGrpcServiceProxy<IPasswordRecoveryService> GetPasswordRecoveryService() => CreateGrpcService<IPasswordRecoveryService>();
     }
 }

@@ -17,11 +17,11 @@ namespace TestApp
 			Console.Write("Press enter to start");
 			Console.ReadLine();
 
-			var factory = new PasswordRecoveryClientFactory("http://localhost:5001");
-			IPasswordRecoveryService client = factory.GetPasswordRecoveryService();
+			//var factory = new PasswordRecoveryClientFactory("http://localhost:5001");
+			//IPasswordRecoveryService client = factory.GetPasswordRecoveryService();
 
-			CommonGrpcResponse response = await client.Recovery(new RecoveryPasswordGrpcRequest {Email = "some@email.com"});
-			Console.WriteLine(response);
+			//CommonGrpcResponse response = await client.Recovery(new RecoveryPasswordGrpcRequest {Email = "some@email.com"});
+			//Console.WriteLine(response);
 
 			Console.WriteLine("End");
 			Console.ReadLine();
