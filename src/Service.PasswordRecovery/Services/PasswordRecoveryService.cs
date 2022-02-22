@@ -5,6 +5,7 @@ using MyJetWallet.Sdk.ServiceBus;
 using Service.Core.Client.Extensions;
 using Service.Core.Client.Models;
 using Service.Core.Client.Services;
+using Service.Grpc;
 using Service.PasswordRecovery.Grpc;
 using Service.PasswordRecovery.Grpc.Models;
 using Service.PasswordRecovery.Models;
@@ -19,12 +20,12 @@ namespace Service.PasswordRecovery.Services
 		private readonly ILogger<PasswordRecoveryService> _logger;
 		private readonly IServiceBusPublisher<RecoveryInfoServiceBusModel> _publisher;
 		private readonly IHashCodeService<EmailHashDto> _hashCodeService;
-		private readonly IUserInfoService _userInfoService;
+		private readonly IGrpcServiceProxy<IUserInfoService> _userInfoService;
 
 		public PasswordRecoveryService(ILogger<PasswordRecoveryService> logger,
 			IServiceBusPublisher<RecoveryInfoServiceBusModel> publisher,
 			IHashCodeService<EmailHashDto> hashCodeService,
-			IUserInfoService userInfoService)
+			IGrpcServiceProxy<IUserInfoService> userInfoService)
 		{
 			_logger = logger;
 			_publisher = publisher;
@@ -68,11 +69,11 @@ namespace Service.PasswordRecovery.Services
 
 			_logger.LogDebug("Changing password for {email} with new password.", email);
 
-			CommonGrpcResponse response = await _userInfoService.ChangePasswordAsync(new UserInfoChangePasswordRequest
+			CommonGrpcResponse response = await _userInfoService.TryCall(service => service.ChangePasswordAsync(new UserInfoChangePasswordRequest
 			{
 				UserName = email,
 				Password = password
-			});
+			}));
 
 			return CommonGrpcResponse.Result(response.IsSuccess);
 		}

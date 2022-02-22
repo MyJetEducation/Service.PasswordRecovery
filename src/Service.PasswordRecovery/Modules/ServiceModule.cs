@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.ServiceBus;
 using MyServiceBus.TcpClient;
 using Service.Core.Client.Services;
@@ -13,7 +14,8 @@ namespace Service.PasswordRecovery.Modules
 	{
 		protected override void Load(ContainerBuilder builder)
 		{
-			builder.RegisterUserInfoCrudClient(Program.Settings.UserInfoCrudServiceUrl);
+			builder.RegisterUserInfoCrudClient(Program.Settings.UserInfoCrudServiceUrl, Program.LogFactory.CreateLogger(typeof(UserInfoCrudClientFactory)));
+
 			builder.RegisterType<PasswordRecoveryService>().AsImplementedInterfaces().SingleInstance();
 			builder.RegisterType<SystemClock>().AsImplementedInterfaces().SingleInstance();
 			builder.RegisterType<HashCodeService<EmailHashDto>>().As<IHashCodeService<EmailHashDto>>().SingleInstance();
