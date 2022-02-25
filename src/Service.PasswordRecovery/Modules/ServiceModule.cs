@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.ServiceBus;
 using MyServiceBus.TcpClient;
 using Service.Core.Client.Services;
-using Service.PasswordRecovery.Models;
 using Service.PasswordRecovery.Services;
 using Service.ServiceBus.Models;
 using Service.UserInfo.Crud.Client;
@@ -18,7 +17,10 @@ namespace Service.PasswordRecovery.Modules
 
 			builder.RegisterType<PasswordRecoveryService>().AsImplementedInterfaces().SingleInstance();
 			builder.RegisterType<SystemClock>().AsImplementedInterfaces().SingleInstance();
-			builder.RegisterType<HashCodeService<EmailHashDto>>().As<IHashCodeService<EmailHashDto>>().SingleInstance();
+
+			builder.Register(context => new EncoderDecoder(Program.EncodingKey))
+				.As<IEncoderDecoder>()
+				.SingleInstance();
 
 			var tcpServiceBus = new MyServiceBusTcpClient(() => Program.Settings.ServiceBusWriter, "MyJetEducation Service.PasswordRecovery");
 

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using MySettingsReader;
+using Service.Core.Client.Extensions;
 using Service.PasswordRecovery.Settings;
 
 namespace Service.PasswordRecovery
@@ -15,22 +16,20 @@ namespace Service.PasswordRecovery
 	public class Program
 	{
 		public const string SettingsFileName = ".myjeteducation";
+		private const string EncodingKeyStr = "ENCODING_KEY";
 
 		public static SettingsModel Settings { get; private set; }
-
+		public static string EncodingKey { get; set; }
 		public static ILoggerFactory LogFactory { get; private set; }
 
-		public static Func<T> ReloadedSettings<T>(Func<SettingsModel, T> getter) => () =>
-		{
-			var settings = SettingsReader.GetSettings<SettingsModel>(SettingsFileName);
-			return getter.Invoke(settings);
-		};
+		public static Func<T> ReloadedSettings<T>(Func<SettingsModel, T> getter) => () => getter.Invoke(GetSettings());
+		public static SettingsModel GetSettings() => SettingsReader.GetSettings<SettingsModel>(SettingsFileName);
 
 		public static void Main(string[] args)
 		{
 			Console.Title = "MyJetEducation Service.PasswordRecovery";
-
 			Settings = SettingsReader.GetSettings<SettingsModel>(SettingsFileName);
+			GetEnvVariables();
 
 			using ILoggerFactory loggerFactory = LogConfigurator.ConfigureElk("MyJetEducation", Settings.SeqServiceUrl, Settings.ElkLogs);
 			ILogger<Program> logger = loggerFactory.CreateLogger<Program>();
@@ -74,5 +73,15 @@ namespace Service.PasswordRecovery
 					services.AddSingleton(loggerFactory);
 					services.AddSingleton(typeof (ILogger<>), typeof (Logger<>));
 				});
+
+		private static void GetEnvVariables()
+		{
+			string key = Environment.GetEnvironmentVariable(EncodingKeyStr);
+
+			if (key.IsNullOrEmpty())
+				throw new Exception($"Env Variable {EncodingKeyStr} is not found");
+
+			EncodingKey = key;
+		}
 	}
 }

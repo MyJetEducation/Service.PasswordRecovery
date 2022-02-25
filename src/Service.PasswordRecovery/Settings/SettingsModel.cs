@@ -20,7 +20,8 @@ namespace Service.PasswordRecovery.Settings
 		[YamlProperty("PasswordRecovery.UserInfoCrudServiceUrl")]
 		public string UserInfoCrudServiceUrl { get; set; }
 
-		[YamlProperty("PasswordRecovery.HashStoreTimeoutMinutes")]
-		public int HashStoreTimeoutMinutes { get; set; }
+		[YamlProperty("PasswordRecovery.PasswordRecoveryTokenExpireMinutes")]
+		public int PasswordRecoveryTokenExpireMinutes { get; set; }
+
 	}
 }
