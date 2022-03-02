@@ -23,31 +23,28 @@ namespace Service.PasswordRecovery.Services
 		private readonly IGrpcServiceProxy<IUserInfoService> _userInfoService;
 		private readonly IEncoderDecoder _encoderDecoder;
 		private readonly ISystemClock _systemClock;
-		private readonly IObjectCache<string> _userNameCache;
-		private readonly IObjectCache<string> _usedHashesCache;
+		private readonly IObjectCache<string> _userNameHashCache;
 
 		public PasswordRecoveryService(ILogger<PasswordRecoveryService> logger,
 			IServiceBusPublisher<RecoveryInfoServiceBusModel> publisher,
 			IGrpcServiceProxy<IUserInfoService> userInfoService, 
 			IEncoderDecoder encoderDecoder, 
 			ISystemClock systemClock, 
-			IObjectCache<string> userNameCache, 
-			IObjectCache<string> usedHashesCache)
+			IObjectCache<string> userNameHashCache)
 		{
 			_logger = logger;
 			_publisher = publisher;
 			_userInfoService = userInfoService;
 			_encoderDecoder = encoderDecoder;
 			_systemClock = systemClock;
-			_userNameCache = userNameCache;
-			_usedHashesCache = usedHashesCache;
+			_userNameHashCache = userNameHashCache;
 		}
 
 		public async ValueTask<CommonGrpcResponse> Recovery(RecoveryPasswordGrpcRequest request)
 		{
 			string userName = request.Email;
 
-			if (_userNameCache.Exists(userName))
+			if (_userNameHashCache.Exists(userName))
 				return CommonGrpcResponse.Success;
 
 			int timeout = Program.ReloadedSettings(model => model.PasswordRecoveryTokenExpireMinutes).Invoke();
@@ -67,7 +64,7 @@ namespace Service.PasswordRecovery.Services
 
 			await _publisher.PublishAsync(recoveryInfoServiceBusModel);
 
-			_userNameCache.Add(userName, expires);
+			_userNameHashCache.Add(userName, expires);
 
 			return CommonGrpcResponse.Success;
 		}
@@ -76,7 +73,7 @@ namespace Service.PasswordRecovery.Services
 		{
 			string token = request.Hash;
 
-			if (_usedHashesCache.Exists(token))
+			if (_userNameHashCache.Exists(token))
 				return CommonGrpcResponse.Fail;
 
 			PasswordRecoveryTokenInfo tokenInfo = DecodePasswordRecoveryToken(token);
@@ -107,7 +104,7 @@ namespace Service.PasswordRecovery.Services
 				Password = password
 			}));
 
-			_usedHashesCache.Add(token, expires);
+			_userNameHashCache.Add(token, expires);
 
 			return CommonGrpcResponse.Result(response.IsSuccess);
 		}
