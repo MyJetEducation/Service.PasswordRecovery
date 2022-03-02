@@ -11,6 +11,8 @@ namespace Service.PasswordRecovery.Services
 		bool Exists(T data);
 
 		void Add(T data, DateTime expire);
+
+		void Remove(T data);
 	}
 
 	public class ObjectCache<T> : IObjectCache<T>
@@ -35,6 +37,13 @@ namespace Service.PasswordRecovery.Services
 			Clean();
 
 			Dictionary.AddOrUpdate(data, t => expire, (t, time) => expire);
+		}
+
+		public void Remove(T data)
+		{
+			Clean();
+
+			Dictionary.TryRemove(data, out DateTime _);
 		}
 
 		private void Clean()

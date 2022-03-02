@@ -105,6 +105,7 @@ namespace Service.PasswordRecovery.Services
 			}));
 
 			_userNameHashCache.Add(token, expires);
+			_userNameHashCache.Remove(email);
 
 			return CommonGrpcResponse.Result(response.IsSuccess);
 		}
