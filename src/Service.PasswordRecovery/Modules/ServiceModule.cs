@@ -17,6 +17,7 @@ namespace Service.PasswordRecovery.Modules
 
 			builder.RegisterType<PasswordRecoveryService>().AsImplementedInterfaces().SingleInstance();
 			builder.RegisterType<SystemClock>().AsImplementedInterfaces().SingleInstance();
+			builder.RegisterType<IObjectCache<string>>().AsImplementedInterfaces().SingleInstance();
 
 			builder.Register(context => new EncoderDecoder(Program.EncodingKey))
 				.As<IEncoderDecoder>()

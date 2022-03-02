@@ -23,48 +23,61 @@ namespace Service.PasswordRecovery.Services
 		private readonly IGrpcServiceProxy<IUserInfoService> _userInfoService;
 		private readonly IEncoderDecoder _encoderDecoder;
 		private readonly ISystemClock _systemClock;
+		private readonly IObjectCache<string> _userNameCache;
+		private readonly IObjectCache<string> _usedHashesCache;
 
 		public PasswordRecoveryService(ILogger<PasswordRecoveryService> logger,
 			IServiceBusPublisher<RecoveryInfoServiceBusModel> publisher,
-			IGrpcServiceProxy<IUserInfoService> userInfoService, IEncoderDecoder encoderDecoder, ISystemClock systemClock)
+			IGrpcServiceProxy<IUserInfoService> userInfoService, 
+			IEncoderDecoder encoderDecoder, 
+			ISystemClock systemClock, 
+			IObjectCache<string> userNameCache, 
+			IObjectCache<string> usedHashesCache)
 		{
 			_logger = logger;
 			_publisher = publisher;
 			_userInfoService = userInfoService;
 			_encoderDecoder = encoderDecoder;
 			_systemClock = systemClock;
+			_userNameCache = userNameCache;
+			_usedHashesCache = usedHashesCache;
 		}
 
 		public async ValueTask<CommonGrpcResponse> Recovery(RecoveryPasswordGrpcRequest request)
 		{
+			string userName = request.Email;
+
+			if (_userNameCache.Exists(userName))
+				return CommonGrpcResponse.Success;
+
+			int timeout = Program.ReloadedSettings(model => model.PasswordRecoveryTokenExpireMinutes).Invoke();
+			DateTime expires = _systemClock.Now.AddMinutes(timeout);
+
 			var recoveryInfoServiceBusModel = new RecoveryInfoServiceBusModel
 			{
-				Email = request.Email,
-				Hash = GeneratePasswordRecoveryToken(request.Email)
+				Email = userName,
+				Hash = _encoderDecoder.EncodeProto(new PasswordRecoveryTokenInfo
+				{
+					PasswordRecoveryEmail = userName,
+					PasswordRecoveryExpires = expires
+				})
 			};
 
 			_logger.LogDebug($"Publish password recovery info to service bus: {JsonSerializer.Serialize(recoveryInfoServiceBusModel)}");
 
 			await _publisher.PublishAsync(recoveryInfoServiceBusModel);
 
+			_userNameCache.Add(userName, expires);
+
 			return CommonGrpcResponse.Success;
-		}
-
-		private string GeneratePasswordRecoveryToken(string userName)
-		{
-			int timeout = Program.ReloadedSettings(model => model.PasswordRecoveryTokenExpireMinutes).Invoke();
-
-			return _encoderDecoder.EncodeProto(new PasswordRecoveryTokenInfo
-			{
-				PasswordRecoveryEmail = userName,
-				PasswordRecoveryExpires = _systemClock.Now.AddMinutes(timeout)
-			});
 		}
 
 		public async ValueTask<CommonGrpcResponse> Change(ChangePasswordGrpcRequest request)
 		{
-			string password = request.Password;
 			string token = request.Hash;
+
+			if (_usedHashesCache.Exists(token))
+				return CommonGrpcResponse.Fail;
 
 			PasswordRecoveryTokenInfo tokenInfo = DecodePasswordRecoveryToken(token);
 			if (tokenInfo == null)
@@ -73,14 +86,16 @@ namespace Service.PasswordRecovery.Services
 			string email = tokenInfo.PasswordRecoveryEmail;
 			string emailMasked = email.Mask();
 
-			if (tokenInfo.PasswordRecoveryExpires < _systemClock.Now)
+			DateTime expires = tokenInfo.PasswordRecoveryExpires;
+			if (expires < _systemClock.Now)
 			{
-				_logger.LogWarning("Token {token} for user: {user} has expired ({date})", token, emailMasked, tokenInfo.PasswordRecoveryExpires);
+				_logger.LogWarning("Token {token} for user: {user} has expired ({date})", token, emailMasked, expires);
 				return CommonGrpcResponse.Fail;
 			}
 
 			_logger.LogDebug("Confirm user registration for user {user} with hash: {hash}.", emailMasked, token);
 
+			string password = request.Password;
 			if (email == null || password.IsNullOrWhiteSpace())
 				return CommonGrpcResponse.Fail;
 
@@ -91,6 +106,8 @@ namespace Service.PasswordRecovery.Services
 				UserName = email,
 				Password = password
 			}));
+
+			_usedHashesCache.Add(token, expires);
 
 			return CommonGrpcResponse.Result(response.IsSuccess);
 		}
